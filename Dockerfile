@@ -192,7 +192,7 @@ RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --fil
     && set -xe \
     && apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
     && apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS \
-    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
     && docker-php-ext-install sockets gd bcmath exif intl soap mbstring mysqli pdo pdo_mysql pgsql pdo_pgsql zip ldap imap dom opcache \
     && printf "\n\n" | pecl install amqp \
     && docker-php-ext-enable amqp \
