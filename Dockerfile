@@ -185,13 +185,14 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
 
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && apk add --no-cache php8-cli php8-dev libstdc++ mysql-client bash bash-completion shadow \
-        supervisor git zip unzip coreutils libpng libmemcached-libs krb5-libs icu-libs \
+        supervisor git zip unzip coreutils libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev libmemcached-libs krb5-libs icu-libs \
         icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
         lua-resty-core nginx-mod-http-lua rabbitmq-c oniguruma-dev ffmpeg \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && set -xe \
     && apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
     && apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS \
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype
     && docker-php-ext-install sockets gd bcmath exif intl soap mbstring mysqli pdo pdo_mysql pgsql pdo_pgsql zip ldap imap dom opcache \
     && printf "\n\n" | pecl install amqp \
     && docker-php-ext-enable amqp \
