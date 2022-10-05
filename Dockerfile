@@ -187,12 +187,12 @@ RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --fil
     && apk add --no-cache php8-cli php8-dev libstdc++ mysql-client bash bash-completion shadow \
         supervisor git zip unzip coreutils libpng libmemcached-libs krb5-libs icu-libs \
         icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
-        lua-resty-core nginx-mod-http-lua rabbitmq-c \
+        lua-resty-core nginx-mod-http-lua rabbitmq-c ffmpeg \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && set -xe \
     && apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
     && apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS \
-    && docker-php-ext-install sockets gd bcmath intl soap mysqli pdo pdo_mysql pgsql pdo_pgsql zip ldap imap dom opcache \
+    && docker-php-ext-install sockets gd bcmath exif intl soap mbstring mysqli pdo pdo_mysql pgsql pdo_pgsql zip ldap imap dom opcache \
     && printf "\n\n" | pecl install amqp \
     && docker-php-ext-enable amqp \
     && printf "\n\n\n\n" | pecl install -o -f redis \
@@ -200,7 +200,7 @@ RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --fil
     && docker-php-ext-enable sockets \
     && pecl install msgpack && docker-php-ext-enable msgpack \
     && pecl install igbinary && docker-php-ext-enable igbinary \
-    && pecl install swoole && docker-php-ext-enable swoole \
+    #&& pecl install swoole && docker-php-ext-enable swoole \
     && printf "\n\n\n\n\n\n\n\n\n\n" | pecl install memcached \
     && docker-php-ext-enable memcached \
     && rm -rf /tmp/pear \
