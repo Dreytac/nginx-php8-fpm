@@ -1,6 +1,6 @@
-FROM node:18.8.0-alpine3.16 AS nodejs
+FROM node:19.7.0-alpine3.17 AS nodejs
 
-FROM php:8.1.10-fpm-alpine3.16
+FROM php:8.2.3-fpm-alpine3.17
 
 LABEL org.opencontainers.image.authors="Wang Junhua(tangramor@gmail.com)"
 LABEL org.opencontainers.image.url="https://www.github.com/tangramor/nginx-php8-fpm"
@@ -33,8 +33,8 @@ ENV PHP_MODULE_DEPS gcc make libc-dev rabbitmq-c-dev zlib-dev libmemcached-dev c
 # ENV MUSL_LOCALE_DEPS cmake make musl-dev gcc gettext-dev libintl 
 # ENV MUSL_LOCPATH /usr/share/i18n/locales/musl
 
-ENV NGINX_VERSION 1.23.1
-ENV NJS_VERSION   0.7.6
+ENV NGINX_VERSION 1.23.3
+ENV NJS_VERSION   0.7.10
 ENV PKG_RELEASE   1
 
 RUN if [ "$APKMIRROR" != "dl-cdn.alpinelinux.org" ]; then sed -i 's/dl-cdn.alpinelinux.org/'$APKMIRROR'/g' /etc/apk/repositories; fi \
@@ -74,7 +74,7 @@ RUN if [ "$APKMIRROR" != "dl-cdn.alpinelinux.org" ]; then sed -i 's/dl-cdn.alpin
         x86_64|aarch64) \
 # arches officially built by upstream
             set -x \
-            && KEY_SHA512="e7fa8303923d9b95db37a77ad46c68fd4755ff935d0a534d26eba83de193c76166c68bfe7f65471bf8881004ef4aa6df3e34689c305662750c0172fca5d8552a *stdin" \
+            && KEY_SHA512="de7031fdac1354096d3388d6f711a508328ce66c168967ee0658c294226d6e7a161ce7f2628d577d56f8b63ff6892cc576af6f7ef2a6aa2e17c62ff7b6bf0d98 *stdin" \
             && apk add --no-cache --virtual .cert-deps \
                 openssl \
             && wget -O /tmp/nginx_signing.rsa.pub https://nginx.org/keys/nginx_signing.rsa.pub \
@@ -184,7 +184,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
     # && sed -i 's/session.save_handler = files/session.save_handler = redis\nsession.save_path = "tcp:\/\/redis:6379"/g' /usr/local/etc/php/php.ini
 
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
-    && apk add --no-cache php8-cli php8-dev libstdc++ mysql-client bash bash-completion shadow \
+    && apk add --no-cache libstdc++ mysql-client bash bash-completion shadow linux-headers \
         supervisor git zip unzip coreutils libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev libmemcached-libs krb5-libs icu-libs \
         icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
         lua-resty-core nginx-mod-http-lua rabbitmq-c oniguruma-dev ffmpeg \
