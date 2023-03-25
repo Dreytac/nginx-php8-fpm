@@ -12,7 +12,7 @@ USER root
 
 WORKDIR /var/www/html
 
-ENV TZ=Asia/Shanghai
+ENV TZ=Australia/Brisbane
 
 # China php composer mirror: https://mirrors.cloud.tencent.com/composer/
 ENV COMPOSERMIRROR=""

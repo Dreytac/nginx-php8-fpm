@@ -1,5 +1,7 @@
 #!/bin/bash
 
+umask 000
+
 # Disable Strict Host checking for non interactive git clones
 
 # Set PHP composer mirror. China php composer mirror: https://mirrors.cloud.tencent.com/composer/
