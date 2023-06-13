@@ -1,6 +1,6 @@
 FROM node:20.2.0-alpine3.17 AS nodejs
 
-FROM tangramor/nginx-php8-fpm:php8.2.6_withoutNodejs
+FROM php:8.2.6-fpm-alpine3.17
 
 LABEL org.opencontainers.image.authors="Wang Junhua(tangramor@gmail.com)"
 LABEL org.opencontainers.image.url="https://www.github.com/tangramor/nginx-php8-fpm"
@@ -15,26 +15,22 @@ WORKDIR /var/www/html
 ENV TZ=Australia/Brisbane
 
 # China php composer mirror: https://mirrors.cloud.tencent.com/composer/
-ENV COMPOSERMIRROR=""
-# China npm mirror: https://registry.npmmirror.com
-ENV NPMMIRROR=""
-
-COPY --from=nodejs /opt /opt
-COPY --from=nodejs /usr/local /usr/local
+ENV COMPOSERMIRROR="https://mirrors.cloud.tencent.com/composer/"
 
 COPY conf/supervisord.conf /etc/supervisord.conf
 COPY conf/php-fpm.conf /etc/supervisor/conf.d/php-fpm.conf
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/default.conf /etc/nginx/conf.d/default.conf
+# COPY conf/resolv.conf /etc/resolv.conf
 
-COPY start.sh /start.sh
+COPY start.withoutNodejs.sh /start.sh
 
 ENV PHP_MODULE_DEPS gcc make libc-dev rabbitmq-c-dev zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
 # ENV MUSL_LOCALE_DEPS cmake make musl-dev gcc gettext-dev libintl 
 # ENV MUSL_LOCPATH /usr/share/i18n/locales/musl
 
-ENV NGINX_VERSION 1.23.3
-ENV NJS_VERSION   0.7.10
+ENV NGINX_VERSION 1.25.0
+ENV NJS_VERSION   0.7.12
 ENV PKG_RELEASE   1
 
 RUN if [ "$APKMIRROR" != "dl-cdn.alpinelinux.org" ]; then sed -i 's/dl-cdn.alpinelinux.org/'$APKMIRROR'/g' /etc/apk/repositories; fi \
@@ -208,13 +204,6 @@ RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --fil
     && apk del .all-deps .phpize-deps \
     # && composer config -g repos.packagist composer https://mirrors.cloud.tencent.com/composer/ \
     # && if [ "$COMPOSERMIRROR" != "" ]; then composer config -g repos.packagist composer ${COMPOSERMIRROR}; fi \
-    # smoke tests
-    && node --version \
-    && npm --version \
-    && yarn --version \
-    # && cd /usr/local \
-    # && npm config set registry https://registry.npmmirror.com \
-    # && if [ "$NPMMIRROR" != "" ]; then npm config set registry ${NPMMIRROR}; fi \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/* \
     && rm -f /etc/nginx/conf.d/default.conf.apk-new && rm -f /etc/nginx/nginx.conf.apk-new \
     && if [ "$APKMIRROR" != "dl-cdn.alpinelinux.org" ]; then sed -i 's/'$APKMIRROR'/dl-cdn.alpinelinux.org/g' /etc/apk/repositories; fi \
