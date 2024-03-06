@@ -1,6 +1,6 @@
-FROM node:20.2.0-alpine3.17 AS nodejs
+FROM node:21.6.2-alpine3.19 AS nodejs
 
-FROM php:8.2.6-fpm-alpine3.17
+FROM php:8.3.3-fpm-alpine3.19
 
 LABEL org.opencontainers.image.authors="Wang Junhua(tangramor@gmail.com)"
 LABEL org.opencontainers.image.url="https://www.github.com/tangramor/nginx-php8-fpm"
@@ -25,12 +25,12 @@ COPY conf/default.conf /etc/nginx/conf.d/default.conf
 
 COPY start.withoutNodejs.sh /start.sh
 
-ENV PHP_MODULE_DEPS gcc make libc-dev rabbitmq-c-dev zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev
+ENV PHP_MODULE_DEPS gcc make libc-dev rabbitmq-c-dev zlib-dev libmemcached-dev cyrus-sasl-dev libpng-dev libxml2-dev krb5-dev curl-dev icu-dev libzip-dev openldap-dev imap-dev postgresql-dev libjpeg-turbo-dev freetype-dev libwebp-dev
 # ENV MUSL_LOCALE_DEPS cmake make musl-dev gcc gettext-dev libintl 
 # ENV MUSL_LOCPATH /usr/share/i18n/locales/musl
 
-ENV NGINX_VERSION 1.25.0
-ENV NJS_VERSION   0.7.12
+ENV NGINX_VERSION 1.25.4
+ENV NJS_VERSION   0.8.3
 ENV PKG_RELEASE   1
 
 RUN if [ "$APKMIRROR" != "dl-cdn.alpinelinux.org" ]; then sed -i 's/dl-cdn.alpinelinux.org/'$APKMIRROR'/g' /etc/apk/repositories; fi \
@@ -181,7 +181,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
 
 RUN curl http://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && apk add --no-cache libstdc++ mysql-client bash bash-completion shadow linux-headers \
-        supervisor git zip unzip coreutils libpng-dev libwebp-dev libjpeg-turbo-dev freetype-dev libmemcached-libs krb5-libs icu-libs \
+        supervisor git zip unzip coreutils libpng libmemcached-libs krb5-libs icu-libs \
         icu c-client libzip openldap-clients imap postgresql-client postgresql-libs libcap tzdata sqlite \
         lua-resty-core nginx-mod-http-lua rabbitmq-c oniguruma-dev ffmpeg \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \

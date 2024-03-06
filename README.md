@@ -1,13 +1,23 @@
 # Nginx + php-fpm (v8) + nodejs
 
-Based on php:8.2.6-fpm-alpine3.17, node:20.2.0-alpine3.17 (nodejs is not included in most of other nginx-php images...but needed by a lot of php frameworks), with nginx:alpine and richarvey/nginx-php-fpm's Docker script
+Based on php:8.3.3-fpm-alpine3.19, node:21.6.2-alpine3.19 (nodejs is not included in most of other nginx-php images...but needed by a lot of php frameworks), with nginx:alpine and richarvey/nginx-php-fpm's Docker script
 
+* Since `php8.2.8_node20.5.0`, PHP `mongodb` module is added and `GD` module's JPEG and FreeType support are enabled.
 * Since `php8.1.8_node18.4.0`, PHP `amqp` module is added.
 * Since `php8.1.10_node18.8.0`, PHP `swoole` module is added.
 * Since `php8.1.12`, added `_withoutNodejs` build for some pure PHP API frameworks like [Lumen](https://lumen.laravel.com)
 
 **Tags:**
-* latest, php8.2.6_node20.2.0, php8.2.6_withoutNodejs (2023-06-07 alpine3.17)
+* latest, php8.3.3_node21.6.2, php8.3.3_withoutNodejs (2024-03-04 alpine3.19)
+* php8.3.2_node21.6.1, php8.3.2_withoutNodejs (2024-02-10 alpine3.19)
+* php8.3.1_node21.5.0, php8.3.1_withoutNodejs (2024-01-03 alpine3.18)
+* php8.3.0_node21.3.0, php8.3.0_withoutNodejs (2023-12-04 alpine3.18) **Note: PHP version is 8.3 now!**
+* php8.2.12_node21.1.0, php8.2.12_withoutNodejs (2023-11-03 alpine3.18)
+* php8.2.11_node20.8.0, php8.2.11_withoutNodejs (2023-10-09 alpine3.18)
+* php8.2.10_node20.6.0, php8.2.10_withoutNodejs (2023-09-08 alpine3.18)
+* php8.2.8_node20.5.0, php8.2.8_withoutNodejs (2023-08-03 alpine3.17)
+* php8.2.7_node20.3.1, php8.2.7_withoutNodejs (2023-07-03 alpine3.17)
+* php8.2.6_node20.2.0, php8.2.6_withoutNodejs (2023-06-07 alpine3.17)
 * php8.2.5_node20.1.0, php8.2.5_withoutNodejs (2023-05-08 alpine3.17)
 * php8.2.4_node19.8.1, php8.2.4_withoutNodejs (2023-04-10 alpine3.17)
 * php8.2.3_node19.7.0, php8.2.3_withoutNodejs (2023-03-06 alpine3.17)
@@ -26,20 +36,20 @@ Based on php:8.2.6-fpm-alpine3.17, node:20.2.0-alpine3.17 (nodejs is not include
 * php8.0.13_node17 (2022-03-07)
 * php8_node15 (2022-03-07)
 
-**NOTE** If you are upgrading from PHP **8.0 to 8.1** or from **8.1 to 8.2**, you may need to run `composer update` to upgrade php packages, because some packages under 8.0/8.1 are not supported in 8.1/8.2
+**NOTE** If you are upgrading from PHP **8.0 to 8.1**, **8.1 to 8.2** or **8.2 to 8.3**, you may need to run `composer update` to upgrade php packages, because some packages under 8.0/8.1/8.2 are not supported in 8.1/8.2/8.3
 
 ```
 # php -v
-PHP 8.2.6 (cli) (built: May 11 2023 20:29:17) (NTS)
+PHP 8.3.3 (cli) (built: Feb 16 2024 21:29:38) (NTS)
 Copyright (c) The PHP Group
-Zend Engine v4.2.6, Copyright (c) Zend Technologies
-    with Zend OPcache v8.2.6, Copyright (c), by Zend Technologies
+Zend Engine v4.3.3, Copyright (c) Zend Technologies
+    with Zend OPcache v8.3.3, Copyright (c), by Zend Technologies
 
 # node -v
-v20.2.0
+v21.6.2
 
 # nginx -v
-nginx version: nginx/1.25.0
+nginx version: nginx/1.25.4
 ```
 
 ## PHP Modules
@@ -56,9 +66,9 @@ ctype
 curl
 date
 dom
+exif
 fileinfo
 filter
-ftp
 gd
 hash
 iconv
@@ -70,6 +80,7 @@ ldap
 libxml
 mbstring
 memcached
+mongodb
 msgpack
 mysqli
 mysqlnd
@@ -105,11 +116,14 @@ zlib
 
 [Zend Modules]
 Zend OPcache
+
+# php -r "echo sprintf(\"GD SUPPORT %s\n\", json_encode(gd_info()));"
+GD SUPPORT {"GD Version":"bundled (2.1.0 compatible)","FreeType Support":true,"FreeType Linkage":"with freetype","GIF Read Support":true,"GIF Create Support":true,"JPEG Support":true,"PNG Support":true,"WBMP Support":true,"XPM Support":false,"XBM Support":true,"WebP Support":true,"BMP Support":true,"AVIF Support":false,"TGA Read Support":true,"JIS-mapped Japanese Font Support":false}
 ```
 
 ## How to use
 
-For example, use this docker image to deploy a **Laravel 9** project.
+For example, use this docker image to deploy a **Laravel 10** project.
 
 Dockerfile:
 
@@ -176,7 +190,7 @@ You may check [start.sh](https://github.com/tangramor/nginx-php8-fpm/blob/master
 
 ### Develop with this image
 
-Another example to develop with this image for a **Laravel 9** project, you may modify the `docker-compose.yml` of your project.
+Another example to develop with this image for a **Laravel 10** project, you may modify the `docker-compose.yml` of your project.
 
 Here we only modified fields `image` and `environment` under `services -> laravel.test`.
 
@@ -188,17 +202,18 @@ version: '3'
 services:
     laravel.test:
         image: tangramor/nginx-php8-fpm
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             TZ: 'Asia/Shanghai'
             WEBROOT: '/var/www/html/public'
             PHP_REDIS_SESSION_HOST: 'redis'
             CREATE_LARAVEL_STORAGE: '1'
             COMPOSERMIRROR: 'https://mirrors.cloud.tencent.com/composer/'
-            NPMMIRROR: 'https://registry.npmmirror.com'
-        ports:
-            - '${APP_PORT:-80}:80'
-        extra_hosts:
-            - 'host.docker.internal:host-gateway'
+            NPMMIRROR: 'https://registry.npm.taobao.org'
         volumes:
             - '.:/var/www/html'
         networks:
@@ -207,6 +222,7 @@ services:
             - mysql
             - redis
             - meilisearch
+            - mailpit
             - selenium
     mysql:
         image: 'mysql/mysql-server:8.0'
@@ -214,17 +230,22 @@ services:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
             MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: "%"
+            MYSQL_ROOT_HOST: '%'
             MYSQL_DATABASE: '${DB_DATABASE}'
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ALLOW_EMPTY_PASSWORD: 1
         volumes:
             - 'sail-mysql:/var/lib/mysql'
+            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
         networks:
             - sail
         healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
     redis:
@@ -236,30 +257,42 @@ services:
         networks:
             - sail
         healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
+            test:
+                - CMD
+                - redis-cli
+                - ping
             retries: 3
             timeout: 5s
     meilisearch:
         image: 'getmeili/meilisearch:latest'
         ports:
             - '${FORWARD_MEILISEARCH_PORT:-7700}:7700'
+        environment:
+            MEILI_NO_ANALYTICS: '${MEILISEARCH_NO_ANALYTICS:-false}'
         volumes:
-            - 'sail-meilisearch:/data.ms'
+            - 'sail-meilisearch:/meili_data'
         networks:
             - sail
         healthcheck:
-            test: ["CMD", "wget", "--no-verbose", "--spider",  "http://localhost:7700/health"]
+            test:
+                - CMD
+                - wget
+                - '--no-verbose'
+                - '--spider'
+                - 'http://localhost:7700/health'
             retries: 3
             timeout: 5s
-    mailhog:
-        image: 'mailhog/mailhog:latest'
+    mailpit:
+        image: 'axllent/mailpit:latest'
         ports:
-            - '${FORWARD_MAILHOG_PORT:-1025}:1025'
-            - '${FORWARD_MAILHOG_DASHBOARD_PORT:-8025}:8025'
+            - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
             - sail
     selenium:
-        image: 'selenium/standalone-chrome'
+        image: selenium/standalone-chrome
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
         volumes:
             - '/dev/shm:/dev/shm'
         networks:
@@ -278,12 +311,12 @@ volumes:
 
 ### Add extra PHP modules
 
-You may use this image as the base image to build your own. For example, to add `mongodb` module:
+You may use this image as the base image to build your own. For example, to add `mongodb` module in images before **php8.2.8_node20.5.0**:
 
 - Create a `Dockerfile`
 
 ```dockerfile
-FROM tangramor/nginx-php8-fpm
+FROM tangramor/nginx-php8-fpm:php8.2.7_node20.3.1
 
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS \
     && apk add --no-cache --update --virtual .all-deps $PHP_MODULE_DEPS \
