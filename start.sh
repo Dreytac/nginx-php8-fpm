@@ -1,6 +1,6 @@
 #!/bin/bash
 
-umask 000
+umask 002
 
 # Disable Strict Host checking for non interactive git clones
 
